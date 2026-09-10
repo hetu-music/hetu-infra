@@ -2,6 +2,8 @@ include "root" {
   path = find_in_parent_folders("root.hcl")
 }
 
+skip = true
+
 terraform {
   source = "../../../modules/aws/network"
 }
