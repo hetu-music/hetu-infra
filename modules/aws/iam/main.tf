@@ -41,7 +41,10 @@ data "aws_iam_policy_document" "hetu_infra_ci_trust" {
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.infra_repo}:*"]
+      values = [
+        "repo:${var.infra_repo}:*",
+        "repo:${split("/", var.infra_repo)[0]}*/${split("/", var.infra_repo)[1]}*:*",
+      ]
     }
   }
 }
@@ -141,7 +144,10 @@ data "aws_iam_policy_document" "hetu_config_ci_trust" {
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.config_repo}:*"]
+      values = [
+        "repo:${var.config_repo}:*",
+        "repo:${split("/", var.config_repo)[0]}*/${split("/", var.config_repo)[1]}*:*",
+      ]
     }
   }
 }
