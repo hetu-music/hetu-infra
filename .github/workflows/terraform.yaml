@@ -1,0 +1,89 @@
+name: "Terragrunt"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+    paths:
+      - 'stacks/**'
+      - 'modules/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+env:
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+  PRE_ORIGIN_DOMAIN_NAME: ${{ secrets.PRE_ORIGIN_DOMAIN_NAME }}
+  TG_LOG_LEVEL: warn
+  TF_IN_AUTOMATION: "true"
+
+jobs:
+  terragrunt:
+    name: "Terragrunt"
+    runs-on: ubuntu-latest
+    if: github.event.action != 'closed' || github.event.pull_request.merged == true
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+        with:
+          # Need full history so the diff below can reach the PR base commit.
+          fetch-depth: 0
+
+      - name: Authenticate to AWS
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.15.6"
+
+      - name: Setup Terragrunt
+        uses: eLco/setup-terragrunt@v1
+
+      - name: Determine Affected Stacks
+        id: filter
+        run: |
+          set -euo pipefail
+
+          BASE="${{ github.event.pull_request.base.sha }}"
+          if [ "${{ github.event.action }}" = "closed" ]; then
+            # PR just merged: diff up to the merge commit that landed on main.
+            HEAD="${{ github.sha }}"
+          else
+            # Still open: diff up to the PR branch's current tip.
+            HEAD="${{ github.event.pull_request.head.sha }}"
+          fi
+
+          echo "Diffing $BASE...$HEAD"
+          CHANGED_FILES="$(git diff --name-only "$BASE...$HEAD")"
+          echo "$CHANGED_FILES"
+
+          if echo "$CHANGED_FILES" | grep -q '^modules/'; then
+            # A shared module changed — it may be consumed by any number of
+            # stacks, so fall back to a full run rather than trying to guess.
+            echo "modules/ changed -> running against all stacks"
+            echo "args=" >> "$GITHUB_OUTPUT"
+          else
+            echo "changes confined to stacks/ -> filtering to affected stacks"
+            echo "args=--filter '[$BASE...$HEAD]' --" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Terragrunt Plan
+        if: github.event.action != 'closed'
+        run: |
+          set -o pipefail
+          terragrunt run --all ${{ steps.filter.outputs.args }} plan --non-interactive 2>&1 | grep -v "Refreshing state"
+
+      - name: Terragrunt Apply
+        if: github.event.pull_request.merged == true
+        run: |
+          set -o pipefail
+          terragrunt run --all ${{ steps.filter.outputs.args }} apply --non-interactive 2>&1 | grep -v "Refreshing state"

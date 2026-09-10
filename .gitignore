@@ -1,0 +1,22 @@
+# Local .terraform directory
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Ignore override files as they are local overrides
+*_override.tf
+*_override.tf.json
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Terragrunt cache directories
+.terragrunt-cache/
+**/.terragrunt-cache/
