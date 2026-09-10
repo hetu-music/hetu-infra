@@ -83,6 +83,7 @@ data "aws_iam_policy_document" "hetu_infra_ci_permissions" {
       "ssm:*",
       "logs:*",
       "acm:*",
+      "cloudfront:*",
     ]
     resources = ["*"]
   }
