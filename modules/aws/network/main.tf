@@ -20,10 +20,10 @@ resource "aws_internet_gateway" "this" {
 resource "aws_subnet" "this" {
   for_each = var.subnets
 
-  vpc_id                   = aws_vpc.this.id
-  cidr_block               = each.value.cidr_block
-  availability_zone        = each.value.az
-  map_public_ip_on_launch  = each.value.tier == "public"
+  vpc_id                  = aws_vpc.this.id
+  cidr_block              = each.value.cidr_block
+  availability_zone       = each.value.az
+  map_public_ip_on_launch = each.value.tier == "public"
 
   tags = merge(var.tags, {
     Name = "${var.name}-${each.key}"
@@ -59,9 +59,9 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route" "public_igw" {
-  route_table_id          = aws_route_table.public.id
-  destination_cidr_block  = "0.0.0.0/0"
-  gateway_id              = aws_internet_gateway.this.id
+  route_table_id         = aws_route_table.public.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.this.id
 }
 
 resource "aws_route_table_association" "public" {
@@ -78,10 +78,10 @@ resource "aws_route_table" "app" {
 }
 
 resource "aws_route" "app_nat" {
-  for_each                 = local.app_subnets
-  route_table_id           = aws_route_table.app[each.key].id
-  destination_cidr_block   = "0.0.0.0/0"
-  nat_gateway_id           = local.nat_by_az[each.value.az]
+  for_each               = local.app_subnets
+  route_table_id         = aws_route_table.app[each.key].id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = local.nat_by_az[each.value.az]
 }
 
 resource "aws_route_table_association" "app" {

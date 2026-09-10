@@ -2,6 +2,11 @@ include "root" {
   path = find_in_parent_folders("root.hcl")
 }
 
+exclude {
+  if      = true
+  actions = ["all"]
+}
+
 # ACM certificate for aws.hetu-music.com in ap-northeast-1 (for ALB).
 
 terraform {

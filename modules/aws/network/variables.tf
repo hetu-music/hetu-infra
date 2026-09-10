@@ -30,8 +30,8 @@ variable "subnets" {
     tier       = string
   }))
   default = {
-    "public-a" = { cidr_block = "10.20.0.0/24",  az = "ap-northeast-1a", tier = "public" }
-    "public-c" = { cidr_block = "10.20.1.0/24",  az = "ap-northeast-1c", tier = "public" }
+    "public-a" = { cidr_block = "10.20.0.0/24", az = "ap-northeast-1a", tier = "public" }
+    "public-c" = { cidr_block = "10.20.1.0/24", az = "ap-northeast-1c", tier = "public" }
     "app-a"    = { cidr_block = "10.20.16.0/24", az = "ap-northeast-1a", tier = "app" }
     "app-c"    = { cidr_block = "10.20.17.0/24", az = "ap-northeast-1c", tier = "app" }
     "data-a"   = { cidr_block = "10.20.32.0/24", az = "ap-northeast-1a", tier = "data" }
