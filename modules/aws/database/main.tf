@@ -19,8 +19,8 @@ resource "aws_db_instance" "this" {
 
   allocated_storage     = var.allocated_storage
   max_allocated_storage = var.max_allocated_storage
-  storage_type           = "gp3"
-  storage_encrypted      = true
+  storage_type          = "gp3"
+  storage_encrypted     = true
 
   db_name                     = var.database_name
   username                    = var.master_username
@@ -39,9 +39,9 @@ resource "aws_db_instance" "this" {
   deletion_protection = false
   skip_final_snapshot = true
 
-  copy_tags_to_snapshot         = true
-  auto_minor_version_upgrade    = true
-  performance_insights_enabled  = true
+  copy_tags_to_snapshot        = true
+  auto_minor_version_upgrade   = true
+  performance_insights_enabled = true
 
   tags = merge(var.tags, { Name = var.name })
 }
