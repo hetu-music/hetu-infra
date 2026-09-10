@@ -9,4 +9,5 @@ resource "cloudflare_dns_record" "dns" {
   proxied  = each.value.proxied
   comment  = each.value.comment == "" ? null : each.value.comment
   priority = each.value.priority
+  tags     = distinct(concat(var.tags, each.value.tags))
 }
