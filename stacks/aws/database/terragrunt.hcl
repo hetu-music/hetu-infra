@@ -2,7 +2,10 @@ include "root" {
   path = find_in_parent_folders("root.hcl")
 }
 
-skip = true
+exclude {
+  if      = true
+  actions = ["all"]
+}
 
 dependency "network" {
   config_path = "../network"
