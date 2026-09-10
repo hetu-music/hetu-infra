@@ -22,6 +22,12 @@ terraform {
 inputs = {
   zone_id = get_env("CLOUDFLARE_ZONE_ID", "")
 
+  tags = [
+    "project:hetu-infra",
+    "environment:production",
+    "managed-by:hetu-infra",
+  ]
+
   records = {
     "pre" = {
       name    = "pre.hetu-music.com"

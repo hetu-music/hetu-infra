@@ -62,5 +62,9 @@ resource "aws_cloudfront_distribution" "this" {
     minimum_protocol_version = "TLSv1.3_2025"
   }
 
-  tags = each.value.tags
+  tags = merge(
+    var.tags,
+    { Name = "${var.name}-${each.key}-cloudfront" },
+    each.value.tags
+  )
 }

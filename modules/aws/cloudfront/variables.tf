@@ -3,6 +3,17 @@ variable "region" {
   type        = string
   default     = "ap-northeast-1"
 }
+variable "name" {
+  description = "Name prefix for CloudFront resources"
+  type        = string
+  default     = "hetu-infra"
+}
+
+variable "tags" {
+  description = "Tags applied to all CloudFront distributions"
+  type        = map(string)
+  default     = {}
+}
 
 variable "distributions" {
   description = "Map of CloudFront distributions to manage."

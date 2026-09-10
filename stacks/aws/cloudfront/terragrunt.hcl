@@ -20,15 +20,22 @@ terraform {
 
 inputs = {
   region = "ap-northeast-1"
+  name   = "hetu-infra"
+
+  tags = {
+    Project     = "hetu-infra"
+    Environment = "production"
+    ManagedBy   = "hetu-infra"
+  }
 
   distributions = {
     "pre" = {
       comment             = "CloudFront for pre.hetu-music.com"
       aliases             = ["pre.hetu-music.com"]
-      origin_id           = "hetu"
+      origin_id           = "hetu-infra-pre"
       origin_domain_name  = get_env("PRE_ORIGIN_DOMAIN_NAME", "")
       acm_certificate_arn = dependency.acm_pre.outputs.certificate_arn
-      tags                = { "Name" = "hetu" }
     }
   }
 }
+
