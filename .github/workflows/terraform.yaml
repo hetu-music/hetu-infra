@@ -20,6 +20,7 @@ env:
   PRE_ORIGIN_DOMAIN_NAME: ${{ secrets.PRE_ORIGIN_DOMAIN_NAME }}
   TG_LOG_LEVEL: warn
   TF_IN_AUTOMATION: "true"
+  TG_NON_INTERACTIVE: "true"
 
 jobs:
   terragrunt:
@@ -73,17 +74,17 @@ jobs:
             echo "args=" >> "$GITHUB_OUTPUT"
           else
             echo "changes confined to stacks/ -> filtering to affected stacks"
-            echo "args=--filter '[$BASE...$HEAD]' --" >> "$GITHUB_OUTPUT"
+            echo "args=--filter=[$BASE...$HEAD]" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Terragrunt Plan
         if: github.event.action != 'closed'
         run: |
           set -o pipefail
-          terragrunt run --all ${{ steps.filter.outputs.args }} plan --non-interactive 2>&1 | grep -v "Refreshing state"
+          terragrunt run --all ${{ steps.filter.outputs.args }} -- plan 2>&1 | grep -v "Refreshing state"
 
       - name: Terragrunt Apply
         if: github.event.pull_request.merged == true
         run: |
           set -o pipefail
-          terragrunt run --all ${{ steps.filter.outputs.args }} apply --non-interactive 2>&1 | grep -v "Refreshing state"
+          terragrunt run --all ${{ steps.filter.outputs.args }} -- apply 2>&1 | grep -v "Refreshing state"
