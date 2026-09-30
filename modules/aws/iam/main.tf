@@ -201,6 +201,28 @@ data "aws_iam_policy_document" "hetu_config_ci_permissions" {
     ]
     resources = ["*"]
   }
+
+  statement {
+    # Ephemeral SSH public key injection for Ansible over SSM
+    sid    = "Ec2InstanceConnect"
+    effect = "Allow"
+    actions = [
+      "ec2-instance-connect:SendSSHPublicKey",
+    ]
+    resources = [
+      "arn:aws:ec2:${var.region}:${data.aws_caller_identity.current.account_id}:instance/*",
+    ]
+    condition {
+      test     = "StringEquals"
+      variable = "ec2:osuser"
+      values   = ["ec2-user"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/Project"
+      values   = [var.name]
+    }
+  }
 }
 
 # Role 3: EC2 Instance Role & Profile (SSM + Secrets/SSM access)
