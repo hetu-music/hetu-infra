@@ -26,7 +26,7 @@ inputs = {
     "pre" = {
       name    = "pre.hetu-music.com"
       type    = "CNAME"
-      content = t.cloudfront.182682.xyz
+      content = "t.cloudfront.182682.xyz"
       proxied = false
       comment = "hetu-infra: pre.hetu-music.com -> CloudFront"
     }
