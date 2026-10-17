@@ -11,11 +11,11 @@ resource "aws_acm_certificate" "this" {
 }
 
 locals {
-  # One entry per distinct domain being validated (domain_name + each SAN, deduped by AWS).
-  # AWS's resource_record_name/_value come back with a trailing dot; Cloudflare doesn't want it.
+  # Deduplicate by resource_record_name: apex domain and wildcard SAN (e.g. example.com and *.example.com)
+  # produce identical CNAME validation records, which would otherwise conflict in Cloudflare.
   validations = {
     for dvo in aws_acm_certificate.this.domain_validation_options :
-    dvo.domain_name => {
+    dvo.resource_record_name => {
       name  = trimsuffix(dvo.resource_record_name, ".")
       type  = dvo.resource_record_type
       value = trimsuffix(dvo.resource_record_value, ".")
@@ -34,7 +34,7 @@ resource "cloudflare_dns_record" "validation" {
   content = each.value.value
   ttl     = 60
   proxied = false
-  comment = "ACM DNS validation for ${var.name} (${each.key})"
+  comment = "ACM DNS validation for ${var.name} (${each.value.name})"
 }
 
 resource "aws_acm_certificate_validation" "this" {
