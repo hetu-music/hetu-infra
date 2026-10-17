@@ -2,7 +2,7 @@ include "root" {
   path = find_in_parent_folders("root.hcl")
 }
 
-# CloudFront distribution for pre.hetu-music.com.
+# CloudFront distributions for pre.hetu-music.com and www.hetu-music.com.
 # ACM certificate is in stacks/aws/acm/wildcard; app-facing CNAME is in stacks/cloudflare/dns.
 
 dependency "acm_wildcard" {
@@ -34,6 +34,13 @@ inputs = {
       aliases             = ["pre.hetu-music.com"]
       origin_id           = "hetu-infra-pre"
       origin_domain_name  = get_env("PRE_ORIGIN_DOMAIN_NAME", "")
+      acm_certificate_arn = dependency.acm_wildcard.outputs.certificate_arn
+    }
+    "www" = {
+      comment             = "CloudFront for www.hetu-music.com"
+      aliases             = ["www.hetu-music.com"]
+      origin_id           = "hetu-infra-www"
+      origin_domain_name  = get_env("WWW_ORIGIN_DOMAIN_NAME", "")
       acm_certificate_arn = dependency.acm_wildcard.outputs.certificate_arn
     }
   }
