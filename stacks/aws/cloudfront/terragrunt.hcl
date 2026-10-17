@@ -3,10 +3,10 @@ include "root" {
 }
 
 # CloudFront distribution for pre.hetu-music.com.
-# ACM certificate is in stacks/aws/acm/pre; app-facing CNAME is in stacks/cloudflare/dns.
+# ACM certificate is in stacks/aws/acm/wildcard; app-facing CNAME is in stacks/cloudflare/dns.
 
-dependency "acm_pre" {
-  config_path = "../acm/pre"
+dependency "acm_wildcard" {
+  config_path = "../acm/wildcard"
 
   mock_outputs = {
     certificate_arn = "arn:aws:acm:us-east-1:000000000000:certificate/00000000-0000-0000-0000-000000000000"
@@ -34,7 +34,7 @@ inputs = {
       aliases             = ["pre.hetu-music.com"]
       origin_id           = "hetu-infra-pre"
       origin_domain_name  = get_env("PRE_ORIGIN_DOMAIN_NAME", "")
-      acm_certificate_arn = dependency.acm_pre.outputs.certificate_arn
+      acm_certificate_arn = dependency.acm_wildcard.outputs.certificate_arn
     }
   }
 }
