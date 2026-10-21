@@ -11,15 +11,21 @@ resource "aws_acm_certificate" "this" {
 }
 
 locals {
-  # One entry per distinct domain being validated (domain_name + each SAN, deduped by AWS).
-  # AWS's resource_record_name/_value come back with a trailing dot; Cloudflare doesn't want it.
+  # Deduplicate domain names statically (e.g. "*.example.com" and "example.com" share the same validation record)
+  # so that for_each keys are static and fully known during the plan phase.
+  distinct_domains = toset([
+    for d in concat([var.domain_name], var.subject_alternative_names) : replace(d, "*.", "")
+  ])
+
   validations = {
-    for dvo in aws_acm_certificate.this.domain_validation_options :
-    dvo.domain_name => {
-      name  = trimsuffix(dvo.resource_record_name, ".")
-      type  = dvo.resource_record_type
-      value = trimsuffix(dvo.resource_record_value, ".")
-    }
+    for domain in local.distinct_domains : domain => [
+      for dvo in aws_acm_certificate.this.domain_validation_options : {
+        name  = trimsuffix(dvo.resource_record_name, ".")
+        type  = dvo.resource_record_type
+        value = trimsuffix(dvo.resource_record_value, ".")
+      }
+      if replace(dvo.domain_name, "*.", "") == domain
+    ][0]
   }
 }
 
@@ -34,7 +40,7 @@ resource "cloudflare_dns_record" "validation" {
   content = each.value.value
   ttl     = 60
   proxied = false
-  comment = "ACM DNS validation for ${var.name} (${each.key})"
+  comment = "ACM DNS validation for ${var.name} (${each.value.name})"
 }
 
 resource "aws_acm_certificate_validation" "this" {

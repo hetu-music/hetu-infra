@@ -28,22 +28,16 @@ variable "existing_github_oidc_provider_arn" {
   default     = ""
 }
 
-variable "infra_repo" {
-  description = "org/repo allowed to assume the hetu-infra-ci role — this repo"
-  type        = string
-  default     = "hetu-music/hetu-infra"
-}
-
-variable "config_repo" {
-  description = "org/repo allowed to assume the hetu-config-ci role — the ansible/SSM-deploy repo"
-  type        = string
-  default     = "hetu-music/kato-config"
-}
-
 variable "ssm_parameter_prefix" {
   description = "SSM Parameter Store path prefix the EC2 role may read (SecureString app config)"
   type        = string
   default     = "/hetu-web"
+}
+
+variable "cloudfront_purge_distribution_ids" {
+  description = "List of CloudFront distribution IDs that the purge user is permitted to invalidate"
+  type        = list(string)
+  default     = ["*"]
 }
 
 variable "tags" {

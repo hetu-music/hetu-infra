@@ -24,3 +24,24 @@ output "ec2_instance_profile_name" {
 output "ec2_instance_profile_arn" {
   value = aws_iam_instance_profile.ec2.arn
 }
+
+output "web_purge_user_name" {
+  description = "IAM user name for CloudFront invalidations"
+  value       = aws_iam_user.web_purge.name
+}
+
+output "web_purge_user_arn" {
+  description = "IAM user ARN for CloudFront invalidations"
+  value       = aws_iam_user.web_purge.arn
+}
+
+output "web_purge_access_key_id" {
+  description = "Access Key ID for hetu-web-purge"
+  value       = aws_iam_access_key.web_purge.id
+}
+
+output "web_purge_secret_access_key" {
+  description = "Secret Access Key for hetu-web-purge"
+  value       = aws_iam_access_key.web_purge.secret
+  sensitive   = true
+}

@@ -10,6 +10,7 @@ dependency "cloudfront" {
   mock_outputs = {
     distributions = {
       "pre" = { domain_name = "mock123.cloudfront.net" }
+      "www" = { domain_name = "mock456.cloudfront.net" }
     }
   }
   mock_outputs_allowed_terraform_commands = ["validate", "plan", "init"]

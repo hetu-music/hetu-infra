@@ -39,11 +39,11 @@ data "aws_iam_policy_document" "hetu_infra_ci_trust" {
     }
 
     condition {
-      test     = "StringLike"
+      test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
       values = [
-        "repo:${var.infra_repo}:*",
-        "repo:${split("/", var.infra_repo)[0]}*/${split("/", var.infra_repo)[1]}*:*",
+        "repo:hetu-music@216563469/hetu-infra@1364019924:ref:refs/heads/main",
+        "repo:hetu-music@216563469/hetu-infra@1364019924:pull_request",
       ]
     }
   }
@@ -118,6 +118,34 @@ data "aws_iam_policy_document" "hetu_infra_ci_permissions" {
       "arn:aws:iam::${data.aws_caller_identity.current.account_id}:instance-profile/${var.name}-*",
     ]
   }
+
+  statement {
+    # Scoped to IAM users and access keys with project name prefix
+    sid    = "IamForUsers"
+    effect = "Allow"
+    actions = [
+      "iam:CreateUser",
+      "iam:DeleteUser",
+      "iam:GetUser",
+      "iam:UpdateUser",
+      "iam:TagUser",
+      "iam:UntagUser",
+      "iam:ListUserTags",
+      "iam:PutUserPolicy",
+      "iam:DeleteUserPolicy",
+      "iam:GetUserPolicy",
+      "iam:ListUserPolicies",
+      "iam:ListAttachedUserPolicies",
+      "iam:CreateAccessKey",
+      "iam:DeleteAccessKey",
+      "iam:ListAccessKeys",
+      "iam:UpdateAccessKey",
+      "iam:GetAccessKeyLastUsed",
+    ]
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${var.name}-*",
+    ]
+  }
 }
 
 # Role 2: Ansible deployment via SSM (kato-config CI)
@@ -144,11 +172,10 @@ data "aws_iam_policy_document" "hetu_config_ci_trust" {
     }
 
     condition {
-      test     = "StringLike"
+      test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
       values = [
-        "repo:${var.config_repo}:*",
-        "repo:${split("/", var.config_repo)[0]}*/${split("/", var.config_repo)[1]}*:*",
+        "repo:hetu-music@216563469/hetu-config@1358907084:ref:refs/heads/main",
       ]
     }
   }
@@ -297,5 +324,36 @@ data "aws_iam_policy_document" "ec2_permissions" {
     effect    = "Allow"
     actions   = ["kms:Decrypt"]
     resources = ["arn:aws:kms:${var.region}:${data.aws_caller_identity.current.account_id}:alias/aws/ssm"]
+  }
+}
+
+# -------------------------------------------------------------------------------------
+# User: CloudFront cache purge user
+# -------------------------------------------------------------------------------------
+
+resource "aws_iam_user" "web_purge" {
+  name = "${var.name}-web-purge"
+  tags = merge(var.tags, { Name = "${var.name}-web-purge" })
+}
+
+resource "aws_iam_user_policy" "web_purge" {
+  name   = "${var.name}-web-purge"
+  user   = aws_iam_user.web_purge.name
+  policy = data.aws_iam_policy_document.web_purge_permissions.json
+}
+
+resource "aws_iam_access_key" "web_purge" {
+  user = aws_iam_user.web_purge.name
+}
+
+data "aws_iam_policy_document" "web_purge_permissions" {
+  statement {
+    sid     = "CloudFrontCreateInvalidation"
+    effect  = "Allow"
+    actions = ["cloudfront:CreateInvalidation"]
+    resources = [
+      for id in var.cloudfront_purge_distribution_ids :
+      "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${id}"
+    ]
   }
 }
