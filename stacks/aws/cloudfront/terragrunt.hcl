@@ -30,20 +30,22 @@ inputs = {
 
   distributions = {
     "pre" = {
-      comment             = "CloudFront for pre.hetu-music.com"
-      aliases             = ["pre.hetu-music.com"]
-      origin_id           = "hetu-infra-pre"
-      origin_domain_name  = get_env("PRE_ORIGIN_DOMAIN_NAME", "")
-      acm_certificate_arn = dependency.acm_wildcard.outputs.certificate_arn
-      cache_policy_id     = "CachingDisabled"
+      comment                  = "CloudFront for pre.hetu-music.com"
+      aliases                  = ["pre.hetu-music.com"]
+      origin_id                = "hetu-infra-pre"
+      origin_domain_name       = get_env("PRE_ORIGIN_DOMAIN_NAME", "")
+      acm_certificate_arn      = dependency.acm_wildcard.outputs.certificate_arn
+      cache_policy_id          = "CachingDisabled"
+      origin_request_policy_id = "AllViewerExceptHostHeader"
     }
     "www" = {
-      comment             = "CloudFront for www.hetu-music.com"
-      aliases             = ["www.hetu-music.com"]
-      origin_id           = "hetu-infra-www"
-      origin_domain_name  = get_env("WWW_ORIGIN_DOMAIN_NAME", "")
-      acm_certificate_arn = dependency.acm_wildcard.outputs.certificate_arn
-      cache_policy_id     = "UseOriginCacheControlHeaders-QueryStrings" # Only caches when origin sends Cache-Control; includes query strings in cache key
+      comment                  = "CloudFront for www.hetu-music.com"
+      aliases                  = ["www.hetu-music.com"]
+      origin_id                = "hetu-infra-www"
+      origin_domain_name       = get_env("WWW_ORIGIN_DOMAIN_NAME", "")
+      acm_certificate_arn      = dependency.acm_wildcard.outputs.certificate_arn
+      cache_policy_id          = "UseOriginCacheControlHeaders-QueryStrings" # Only caches when origin sends Cache-Control; includes query strings in cache key
+      origin_request_policy_id = "AllViewer"
     }
   }
 }

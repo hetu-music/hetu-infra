@@ -25,8 +25,9 @@ variable "distributions" {
     origin_path         = optional(string, "")
     acm_certificate_arn = string
     grpc_enabled        = optional(bool, false)
-    cache_policy_id     = optional(string, null)
-    tags                = optional(map(string), {})
+    cache_policy_id          = optional(string, null)
+    origin_request_policy_id = optional(string, null)
+    tags                     = optional(map(string), {})
   }))
   default = {}
 }

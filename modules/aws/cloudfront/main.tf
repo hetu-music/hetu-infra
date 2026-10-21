@@ -16,6 +16,15 @@ locals {
     "CachingDisabled"                           = data.aws_cloudfront_cache_policy.caching_disabled.id
     "UseOriginCacheControlHeaders-QueryStrings" = data.aws_cloudfront_cache_policy.use_origin_cache_control_headers_query_strings.id
   }
+
+  managed_origin_request_policies = {
+    "AllViewer"                 = data.aws_cloudfront_origin_request_policy.all_viewer.id
+    "AllViewerExceptHostHeader" = data.aws_cloudfront_origin_request_policy.all_viewer_except_host.id
+  }
+}
+
+data "aws_cloudfront_origin_request_policy" "all_viewer" {
+  name = "Managed-AllViewer"
 }
 
 data "aws_cloudfront_origin_request_policy" "all_viewer_except_host" {
@@ -56,7 +65,7 @@ resource "aws_cloudfront_distribution" "this" {
     compress               = true
 
     cache_policy_id          = lookup(local.managed_cache_policies, each.value.cache_policy_id, coalesce(each.value.cache_policy_id, data.aws_cloudfront_cache_policy.caching_disabled.id))
-    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.all_viewer_except_host.id
+    origin_request_policy_id = lookup(local.managed_origin_request_policies, each.value.origin_request_policy_id, coalesce(each.value.origin_request_policy_id, data.aws_cloudfront_origin_request_policy.all_viewer.id))
 
     dynamic "grpc_config" {
       for_each = each.value.grpc_enabled ? [1] : []
