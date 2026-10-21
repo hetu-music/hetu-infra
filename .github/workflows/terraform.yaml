@@ -83,10 +83,10 @@ jobs:
           if [ -n "$STACK" ]; then
             echo "Running terragrunt $COMMAND in $STACK"
             cd "$STACK"
-            terragrunt run -- "$COMMAND" $ARGS 2>&1 | grep --line-buffered -v "Refreshing state"
+            terragrunt run -- "$COMMAND" $ARGS 2>&1 | grep -v "Refreshing state"
           else
             echo "Running terragrunt run --all -- $COMMAND across all stacks"
-            terragrunt run --all -- "$COMMAND" $ARGS 2>&1 | grep --line-buffered -v "Refreshing state"
+            terragrunt run --all -- "$COMMAND" $ARGS 2>&1 | grep -v "Refreshing state"
           fi
 
       - name: Determine Affected Stacks
