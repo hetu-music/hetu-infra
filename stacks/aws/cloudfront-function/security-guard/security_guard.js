@@ -64,7 +64,15 @@ var BLOCKED_USER_AGENTS = [
     'medusa',
     'burpsuite',
     'nuclei',
-    'havij'
+    'havij',
+    // 搜索引擎爬虫 / AI 抓取机器人
+    'pider',
+    'sogou',
+    'yisou',
+    'chinaso',
+    'deepseek',
+    'qwen',
+    'petalbot'
 ];
 
 // 4. 允许的 HTTP 方法
