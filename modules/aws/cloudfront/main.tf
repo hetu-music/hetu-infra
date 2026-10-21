@@ -73,6 +73,20 @@ resource "aws_cloudfront_distribution" "this" {
         enabled = true
       }
     }
+
+    dynamic "function_association" {
+      for_each = concat(
+        each.value.enable_security_guard ? [{
+          event_type   = "viewer-request"
+          function_arn = aws_cloudfront_function.security_guard[each.key].arn
+        }] : [],
+        each.value.function_associations
+      )
+      content {
+        event_type   = function_association.value.event_type
+        function_arn = function_association.value.function_arn
+      }
+    }
   }
 
   restrictions {
@@ -94,3 +108,17 @@ resource "aws_cloudfront_distribution" "this" {
     each.value.tags
   )
 }
+
+resource "aws_cloudfront_function" "security_guard" {
+  for_each = {
+    for k, v in var.distributions : k => v
+    if v.enable_security_guard
+  }
+
+  name    = "${var.name}-${each.key}-security-guard"
+  runtime = "cloudfront-js-2.0"
+  comment = "Security inspection function for ${var.name}-${each.key}"
+  publish = true
+  code    = file("${path.module}/functions/security_guard.js")
+}
+

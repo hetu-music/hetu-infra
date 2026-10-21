@@ -50,6 +50,7 @@ inputs = {
         restriction_type = "whitelist"
         locations        = ["CN", "HK", "MO"]
       }
+      enable_security_guard = true
     }
   }
 }
