@@ -18,16 +18,24 @@ variable "tags" {
 variable "distributions" {
   description = "Map of CloudFront distributions to manage."
   type = map(object({
-    comment             = optional(string, "")
-    aliases             = list(string)
-    origin_id           = string
-    origin_domain_name  = string
-    origin_path         = optional(string, "")
-    acm_certificate_arn = string
-    grpc_enabled        = optional(bool, false)
+    comment                  = optional(string, "")
+    aliases                  = list(string)
+    origin_id                = string
+    origin_domain_name       = string
+    origin_path              = optional(string, "")
+    acm_certificate_arn      = string
+    grpc_enabled             = optional(bool, false)
     cache_policy_id          = optional(string, null)
     origin_request_policy_id = optional(string, null)
-    tags                     = optional(map(string), {})
+    geo_restriction = optional(object({
+      restriction_type = optional(string, "none")
+      locations        = optional(list(string), [])
+    }), {})
+    function_associations = optional(list(object({
+      event_type   = string
+      function_arn = string
+    })), [])
+    tags = optional(map(string), {})
   }))
   default = {}
 }

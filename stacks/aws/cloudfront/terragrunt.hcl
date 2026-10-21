@@ -14,6 +14,15 @@ dependency "acm_wildcard" {
   mock_outputs_allowed_terraform_commands = ["validate", "plan", "init"]
 }
 
+dependency "security_guard_function" {
+  config_path = "../cloudfront-function/security-guard"
+
+  mock_outputs = {
+    arn = "arn:aws:cloudfront::000000000000:function/mock-security-guard"
+  }
+  mock_outputs_allowed_terraform_commands = ["validate", "plan", "init"]
+}
+
 terraform {
   source = "../../../modules/aws/cloudfront"
 }
@@ -46,6 +55,16 @@ inputs = {
       acm_certificate_arn      = dependency.acm_wildcard.outputs.certificate_arn
       cache_policy_id          = "UseOriginCacheControlHeaders-QueryStrings" # Only caches when origin sends Cache-Control; includes query strings in cache key
       origin_request_policy_id = "AllViewer"
+      geo_restriction = {
+        restriction_type = "whitelist"
+        locations        = ["CN", "HK", "MO"]
+      }
+      function_associations = [
+        {
+          event_type   = "viewer-request"
+          function_arn = dependency.security_guard_function.outputs.arn
+        }
+      ]
     }
   }
 }

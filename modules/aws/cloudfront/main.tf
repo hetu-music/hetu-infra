@@ -73,11 +73,20 @@ resource "aws_cloudfront_distribution" "this" {
         enabled = true
       }
     }
+
+    dynamic "function_association" {
+      for_each = each.value.function_associations
+      content {
+        event_type   = function_association.value.event_type
+        function_arn = function_association.value.function_arn
+      }
+    }
   }
 
   restrictions {
     geo_restriction {
-      restriction_type = "none"
+      restriction_type = each.value.geo_restriction.restriction_type
+      locations        = each.value.geo_restriction.restriction_type != "none" ? each.value.geo_restriction.locations : []
     }
   }
 
@@ -93,3 +102,4 @@ resource "aws_cloudfront_distribution" "this" {
     each.value.tags
   )
 }
+
