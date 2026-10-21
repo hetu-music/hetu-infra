@@ -94,13 +94,15 @@ function handler(event) {
         }
     }
 
-    // 检查 4: 恶意扫描器 User-Agent 过滤
-    if (request.headers['user-agent']) {
-        var ua = request.headers['user-agent'].value.toLowerCase();
-        for (var k = 0; k < BLOCKED_USER_AGENTS.length; k++) {
-            if (ua.includes(BLOCKED_USER_AGENTS[k])) {
-                return blockResponse(403, 'Forbidden');
-            }
+    // 检查 4: User-Agent 检查（拦截缺失/空 UA 以及恶意扫描器）
+    if (!request.headers['user-agent'] || !request.headers['user-agent'].value || request.headers['user-agent'].value.trim() === '') {
+        return blockResponse(403, 'Forbidden');
+    }
+
+    var ua = request.headers['user-agent'].value.toLowerCase();
+    for (var k = 0; k < BLOCKED_USER_AGENTS.length; k++) {
+        if (ua.includes(BLOCKED_USER_AGENTS[k])) {
+            return blockResponse(403, 'Forbidden');
         }
     }
 
