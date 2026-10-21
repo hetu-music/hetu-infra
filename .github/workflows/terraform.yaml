@@ -75,13 +75,18 @@ jobs:
           COMMAND="${{ inputs.command }}"
           STACK="${{ inputs.stack }}"
 
+          ARGS=""
+          if [ "$COMMAND" = "apply" ]; then
+            ARGS="-auto-approve"
+          fi
+
           if [ -n "$STACK" ]; then
             echo "Running terragrunt $COMMAND in $STACK"
             cd "$STACK"
-            terragrunt "$COMMAND" 2>&1 | grep -v "Refreshing state"
+            terragrunt run -- "$COMMAND" $ARGS 2>&1 | grep --line-buffered -v "Refreshing state"
           else
             echo "Running terragrunt run --all -- $COMMAND across all stacks"
-            terragrunt run --all -- "$COMMAND" 2>&1 | grep -v "Refreshing state"
+            terragrunt run --all -- "$COMMAND" $ARGS 2>&1 | grep --line-buffered -v "Refreshing state"
           fi
 
       - name: Determine Affected Stacks
