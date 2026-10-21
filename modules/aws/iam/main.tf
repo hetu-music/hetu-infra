@@ -314,6 +314,10 @@ resource "aws_iam_user_policy" "web_purge" {
   policy = data.aws_iam_policy_document.web_purge_permissions.json
 }
 
+resource "aws_iam_access_key" "web_purge" {
+  user = aws_iam_user.web_purge.name
+}
+
 data "aws_iam_policy_document" "web_purge_permissions" {
   statement {
     sid     = "CloudFrontCreateInvalidation"
