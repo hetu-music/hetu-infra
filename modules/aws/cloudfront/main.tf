@@ -6,10 +6,15 @@ data "aws_cloudfront_cache_policy" "caching_optimized" {
   name = "Managed-CachingOptimized"
 }
 
+data "aws_cloudfront_cache_policy" "use_origin_cache_control_headers_query_strings" {
+  name = "Managed-UseOriginCacheControlHeaders-QueryStrings"
+}
+
 locals {
   managed_cache_policies = {
-    "CachingOptimized" = data.aws_cloudfront_cache_policy.caching_optimized.id
-    "CachingDisabled"  = data.aws_cloudfront_cache_policy.caching_disabled.id
+    "CachingOptimized"                          = data.aws_cloudfront_cache_policy.caching_optimized.id
+    "CachingDisabled"                           = data.aws_cloudfront_cache_policy.caching_disabled.id
+    "UseOriginCacheControlHeaders-QueryStrings" = data.aws_cloudfront_cache_policy.use_origin_cache_control_headers_query_strings.id
   }
 }
 

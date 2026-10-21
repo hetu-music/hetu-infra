@@ -43,7 +43,7 @@ inputs = {
       origin_id           = "hetu-infra-www"
       origin_domain_name  = get_env("WWW_ORIGIN_DOMAIN_NAME", "")
       acm_certificate_arn = dependency.acm_wildcard.outputs.certificate_arn
-      cache_policy_id     = "CachingOptimized" # Caching governed by origin Cache-Control headers
+      cache_policy_id     = "UseOriginCacheControlHeaders-QueryStrings" # Only caches when origin sends Cache-Control; includes query strings in cache key
     }
   }
 }
