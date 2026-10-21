@@ -298,3 +298,30 @@ data "aws_iam_policy_document" "ec2_permissions" {
     resources = ["arn:aws:kms:${var.region}:${data.aws_caller_identity.current.account_id}:alias/aws/ssm"]
   }
 }
+
+# -------------------------------------------------------------------------------------
+# User: CloudFront cache purge user
+# -------------------------------------------------------------------------------------
+
+resource "aws_iam_user" "web_purge" {
+  name = "${var.name}-web-purge"
+  tags = merge(var.tags, { Name = "${var.name}-web-purge" })
+}
+
+resource "aws_iam_user_policy" "web_purge" {
+  name   = "${var.name}-web-purge"
+  user   = aws_iam_user.web_purge.name
+  policy = data.aws_iam_policy_document.web_purge_permissions.json
+}
+
+data "aws_iam_policy_document" "web_purge_permissions" {
+  statement {
+    sid     = "CloudFrontCreateInvalidation"
+    effect  = "Allow"
+    actions = ["cloudfront:CreateInvalidation"]
+    resources = [
+      for id in var.cloudfront_purge_distribution_ids :
+      can(regex("^arn:aws:cloudfront:", id)) ? id : "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${id}"
+    ]
+  }
+}

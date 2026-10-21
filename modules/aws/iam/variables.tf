@@ -34,6 +34,12 @@ variable "ssm_parameter_prefix" {
   default     = "/hetu-web"
 }
 
+variable "cloudfront_purge_distribution_ids" {
+  description = "List of CloudFront distribution IDs (or ARNs) that the purge user is permitted to invalidate"
+  type        = list(string)
+  default     = ["*"]
+}
+
 variable "tags" {
   description = "Tags applied to every resource this module creates"
   type        = map(string)
