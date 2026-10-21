@@ -5,8 +5,20 @@ variable "region" {
 }
 
 variable "name" {
-  description = "Name of the CloudFront Function"
+  description = "Short name prefix used to tag/name every resource this module creates"
   type        = string
+  default     = "hetu-infra"
+}
+
+variable "function_name" {
+  description = "Name suffix for the CloudFront Function"
+  type        = string
+}
+
+variable "tags" {
+  description = "Tags applied to every resource this module creates"
+  type        = map(string)
+  default     = {}
 }
 
 variable "runtime" {
