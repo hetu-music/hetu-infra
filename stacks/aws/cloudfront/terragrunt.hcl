@@ -46,6 +46,10 @@ inputs = {
       acm_certificate_arn      = dependency.acm_wildcard.outputs.certificate_arn
       cache_policy_id          = "UseOriginCacheControlHeaders-QueryStrings" # Only caches when origin sends Cache-Control; includes query strings in cache key
       origin_request_policy_id = "AllViewer"
+      geo_restriction = {
+        restriction_type = "whitelist"
+        locations        = ["CN", "HK", "MO"]
+      }
     }
   }
 }

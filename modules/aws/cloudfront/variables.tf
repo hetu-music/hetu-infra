@@ -27,6 +27,10 @@ variable "distributions" {
     grpc_enabled        = optional(bool, false)
     cache_policy_id          = optional(string, null)
     origin_request_policy_id = optional(string, null)
+    geo_restriction = optional(object({
+      restriction_type = optional(string, "none")
+      locations        = optional(list(string), [])
+    }), {})
     tags                     = optional(map(string), {})
   }))
   default = {}
