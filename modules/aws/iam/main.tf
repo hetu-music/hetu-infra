@@ -321,7 +321,7 @@ data "aws_iam_policy_document" "web_purge_permissions" {
     actions = ["cloudfront:CreateInvalidation"]
     resources = [
       for id in var.cloudfront_purge_distribution_ids :
-      can(regex("^arn:aws:cloudfront:", id)) ? id : "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${id}"
+      "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${id}"
     ]
   }
 }
