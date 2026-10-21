@@ -14,6 +14,15 @@ dependency "acm_wildcard" {
   mock_outputs_allowed_terraform_commands = ["validate", "plan", "init"]
 }
 
+dependency "security_guard_function" {
+  config_path = "../cloudfront-function/security-guard"
+
+  mock_outputs = {
+    arn = "arn:aws:cloudfront::000000000000:function/mock-security-guard"
+  }
+  mock_outputs_allowed_terraform_commands = ["validate", "plan", "init"]
+}
+
 terraform {
   source = "../../../modules/aws/cloudfront"
 }
@@ -50,7 +59,12 @@ inputs = {
         restriction_type = "whitelist"
         locations        = ["CN", "HK", "MO"]
       }
-      enable_security_guard = true
+      function_associations = [
+        {
+          event_type   = "viewer-request"
+          function_arn = dependency.security_guard_function.outputs.arn
+        }
+      ]
     }
   }
 }

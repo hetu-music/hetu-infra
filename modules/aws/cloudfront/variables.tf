@@ -31,7 +31,6 @@ variable "distributions" {
       restriction_type = optional(string, "none")
       locations        = optional(list(string), [])
     }), {})
-    enable_security_guard = optional(bool, false)
     function_associations = optional(list(object({
       event_type   = string
       function_arn = string
