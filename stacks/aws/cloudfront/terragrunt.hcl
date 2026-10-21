@@ -35,6 +35,7 @@ inputs = {
       origin_id           = "hetu-infra-pre"
       origin_domain_name  = get_env("PRE_ORIGIN_DOMAIN_NAME", "")
       acm_certificate_arn = dependency.acm_wildcard.outputs.certificate_arn
+      cache_policy_id     = "CachingDisabled"
     }
     "www" = {
       comment             = "CloudFront for www.hetu-music.com"
@@ -42,6 +43,7 @@ inputs = {
       origin_id           = "hetu-infra-www"
       origin_domain_name  = get_env("WWW_ORIGIN_DOMAIN_NAME", "")
       acm_certificate_arn = dependency.acm_wildcard.outputs.certificate_arn
+      cache_policy_id     = "CachingOptimized" # Caching governed by origin Cache-Control headers
     }
   }
 }
