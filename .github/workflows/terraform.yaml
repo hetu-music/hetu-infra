@@ -8,6 +8,21 @@ on:
     paths:
       - 'stacks/**'
       - 'modules/**'
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "Terragrunt command to run"
+        required: true
+        type: choice
+        default: "apply"
+        options:
+          - apply
+          - plan
+      stack:
+        description: "Target stack path (e.g. stacks/aws/cloudfront, or leave empty for all)"
+        required: false
+        type: string
+        default: "stacks/aws/cloudfront"
 
 permissions:
   contents: read
@@ -27,7 +42,10 @@ jobs:
   terragrunt:
     name: "Terragrunt"
     runs-on: ubuntu-latest
-    if: github.event.action != 'closed' || github.event.pull_request.merged == true
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event.action != 'closed' ||
+      github.event.pull_request.merged == true
 
     steps:
       - name: Checkout Code
@@ -50,7 +68,24 @@ jobs:
       - name: Setup Terragrunt
         uses: eLco/setup-terragrunt@v1
 
+      - name: Terragrunt Manual Run
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          set -o pipefail
+          COMMAND="${{ inputs.command }}"
+          STACK="${{ inputs.stack }}"
+
+          if [ -n "$STACK" ]; then
+            echo "Running terragrunt $COMMAND in $STACK"
+            cd "$STACK"
+            terragrunt "$COMMAND" 2>&1 | grep -v "Refreshing state"
+          else
+            echo "Running terragrunt run --all -- $COMMAND across all stacks"
+            terragrunt run --all -- "$COMMAND" 2>&1 | grep -v "Refreshing state"
+          fi
+
       - name: Determine Affected Stacks
+        if: github.event_name == 'pull_request'
         id: filter
         run: |
           set -euo pipefail
@@ -78,14 +113,14 @@ jobs:
             echo "args=--filter=[$BASE...$HEAD]" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Terragrunt Plan
-        if: github.event.action != 'closed'
+      - name: Terragrunt Plan (PR)
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
         run: |
           set -o pipefail
           terragrunt run --all ${{ steps.filter.outputs.args }} -- plan 2>&1 | grep -v "Refreshing state"
 
-      - name: Terragrunt Apply
-        if: github.event.pull_request.merged == true
+      - name: Terragrunt Apply (PR Merge)
+        if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
         run: |
           set -o pipefail
           terragrunt run --all ${{ steps.filter.outputs.args }} -- apply 2>&1 | grep -v "Refreshing state"
