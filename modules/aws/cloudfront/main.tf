@@ -7,7 +7,7 @@ data "aws_cloudfront_cache_policy" "caching_optimized" {
 }
 
 data "aws_cloudfront_cache_policy" "use_origin_cache_control_headers_query_strings" {
-  name = "Managed-UseOriginCacheControlHeaders-QueryStrings"
+  name = "UseOriginCacheControlHeaders-QueryStrings"
 }
 
 locals {
