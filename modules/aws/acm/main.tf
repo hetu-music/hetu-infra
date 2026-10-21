@@ -11,15 +11,21 @@ resource "aws_acm_certificate" "this" {
 }
 
 locals {
-  # Deduplicate by resource_record_name: apex domain and wildcard SAN (e.g. example.com and *.example.com)
-  # produce identical CNAME validation records, which would otherwise conflict in Cloudflare.
+  # Deduplicate domain names statically (e.g. "*.example.com" and "example.com" share the same validation record)
+  # so that for_each keys are static and fully known during the plan phase.
+  distinct_domains = toset([
+    for d in concat([var.domain_name], var.subject_alternative_names) : replace(d, "*.", "")
+  ])
+
   validations = {
-    for dvo in aws_acm_certificate.this.domain_validation_options :
-    dvo.resource_record_name => {
-      name  = trimsuffix(dvo.resource_record_name, ".")
-      type  = dvo.resource_record_type
-      value = trimsuffix(dvo.resource_record_value, ".")
-    }
+    for domain in local.distinct_domains : domain => [
+      for dvo in aws_acm_certificate.this.domain_validation_options : {
+        name  = trimsuffix(dvo.resource_record_name, ".")
+        type  = dvo.resource_record_type
+        value = trimsuffix(dvo.resource_record_value, ".")
+      }
+      if replace(dvo.domain_name, "*.", "") == domain
+    ][0]
   }
 }
 

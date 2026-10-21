@@ -118,6 +118,34 @@ data "aws_iam_policy_document" "hetu_infra_ci_permissions" {
       "arn:aws:iam::${data.aws_caller_identity.current.account_id}:instance-profile/${var.name}-*",
     ]
   }
+
+  statement {
+    # Scoped to IAM users and access keys with project name prefix
+    sid    = "IamForUsers"
+    effect = "Allow"
+    actions = [
+      "iam:CreateUser",
+      "iam:DeleteUser",
+      "iam:GetUser",
+      "iam:UpdateUser",
+      "iam:TagUser",
+      "iam:UntagUser",
+      "iam:ListUserTags",
+      "iam:PutUserPolicy",
+      "iam:DeleteUserPolicy",
+      "iam:GetUserPolicy",
+      "iam:ListUserPolicies",
+      "iam:ListAttachedUserPolicies",
+      "iam:CreateAccessKey",
+      "iam:DeleteAccessKey",
+      "iam:ListAccessKeys",
+      "iam:UpdateAccessKey",
+      "iam:GetAccessKeyLastUsed",
+    ]
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${var.name}-*",
+    ]
+  }
 }
 
 # Role 2: Ansible deployment via SSM (kato-config CI)
